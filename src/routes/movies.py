@@ -10,6 +10,8 @@ from schemas.movies import (
     MovieCreateSchema,
     MovieResponseSchema,
     MoviesListResponseSchema,
+    MovieListItemSchema,
+    MovieUpdateSchema,
 )
 
 
@@ -49,10 +51,12 @@ async def get_movies_list(
     if not movies:
         raise HTTPException(status_code=404, detail="No movies found.")
 
-    prev_page = f"/movies/?page={page - 1}&per_page={per_page}" if page > 1 else None
-    next_page = f"/movies/?page={page + 1}&per_page={per_page}" if page < total_pages else None
+    BASE_PATH = "/theater/movies/"
 
-    movies_list = [MovieResponseSchema.model_validate(movie) for movie in movies]
+    prev_page = f"{BASE_PATH}?page={page - 1}&per_page={per_page}" if page > 1 else None
+    next_page = f"{BASE_PATH}?page={page + 1}&per_page={per_page}" if page < total_pages else None
+
+    movies_list = [MovieListItemSchema.model_validate(movie) for movie in movies]
 
     return MoviesListResponseSchema(
         movies=movies_list,
@@ -145,7 +149,7 @@ async def get_movie_details(movie_id: int, db: AsyncSession = Depends(get_db)):
     result = await db.execute(query)
     movie = result.scalar_one_or_none()
     if not movie:
-        raise HTTPException(status_code=404, detail="Movie not found.")
+        raise HTTPException(status_code=404, detail="Movie with the given ID was not found.")
     return MovieResponseSchema.model_validate(movie)
 
 
@@ -163,7 +167,7 @@ async def delete_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
 @router.patch("/movies/{movie_id}/", response_model=MovieResponseSchema)
 async def update_movie(
     movie_id: int,
-    movie_update: MovieCreateSchema,
+    movie_update: MovieUpdateSchema,
     db: AsyncSession = Depends(get_db),
 ):
     query = select(MovieModel).where(MovieModel.id == movie_id).options(

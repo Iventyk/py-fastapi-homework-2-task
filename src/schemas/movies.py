@@ -75,9 +75,35 @@ class MovieResponseSchema(BaseModel):
     languages: list[LanguageSchema] = Field(default_factory=list)
 
 
+class MovieListItemSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    date: date
+    score: float
+    overview: Optional[str]
+
+
 class MoviesListResponseSchema(BaseModel):
-    movies: List[MovieResponseSchema]
+    movies: List[MovieListItemSchema]
     prev_page: Optional[str]
     next_page: Optional[str]
     total_pages: int
     total_items: int
+
+
+class MovieUpdateSchema(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
+    date: date
+    score: float
+    overview: str | None = None
+    status: MovieStatusEnum
+    budget: float
+    revenue: float
+    country: CountrySchema | None = None
+    genres: list[GenreSchema] = Field(default_factory=list)
+    actors: list[ActorSchema] = Field(default_factory=list)
+    languages: list[LanguageSchema] = Field(default_factory=list)
