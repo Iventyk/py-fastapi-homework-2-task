@@ -1,3 +1,4 @@
+import datetime
 from datetime import date, timedelta
 from typing import List, Optional
 from pydantic import BaseModel, Field, field_validator, ConfigDict
@@ -97,7 +98,7 @@ class MovieUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     name: str | None = None
-    date: date | None = None
+    date: datetime.date | None = None
     score: float | None = None
     overview: str | None = None
     status: MovieStatusEnum | None = None
