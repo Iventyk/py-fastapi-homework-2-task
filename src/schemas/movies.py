@@ -104,7 +104,3 @@ class MovieUpdateSchema(BaseModel):
     status: MovieStatusEnum | None = None
     budget: float | None = None
     revenue: float | None = None
-    country: CountrySchema | None = None
-    genres: list[GenreSchema] | None = Field(default_factory=list)
-    actors: list[ActorSchema] | None = Field(default_factory=list)
-    languages: list[LanguageSchema] | None = Field(default_factory=list)

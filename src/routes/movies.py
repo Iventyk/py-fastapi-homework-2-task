@@ -193,29 +193,6 @@ async def update_movie(
         if field not in ["country", "genres", "actors", "languages"]:
             setattr(movie_obj, field, value)
 
-    if "country" in update_data:
-        country_code = update_data["country"]
-        if country_code:
-            country_code = country_code[:3]
-            country_query = await db.execute(
-                select(CountryModel).where(CountryModel.code == country_code)
-            )
-            country_obj = country_query.scalar_one_or_none()
-            if not country_obj:
-                country_obj = CountryModel(code=country_code)
-                db.add(country_obj)
-                await db.flush()
-            movie_obj.country = country_obj
-        else:
-            movie_obj.country = None
-
-    if "genres" in update_data:
-        movie_obj.genres = await get_or_create_entities(db, GenreModel, update_data["genres"])
-    if "actors" in update_data:
-        movie_obj.actors = await get_or_create_entities(db, ActorModel, update_data["actors"])
-    if "languages" in update_data:
-        movie_obj.languages = await get_or_create_entities(db, LanguageModel, update_data["languages"])
-
     try:
         await db.commit()
     except IntegrityError:
