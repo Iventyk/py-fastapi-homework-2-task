@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import select, func
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -164,7 +165,7 @@ async def delete_movie(movie_id: int, db: AsyncSession = Depends(get_db)):
     return
 
 
-@router.patch("/movies/{movie_id}/", response_model=MovieResponseSchema)
+@router.patch("/movies/{movie_id}/")
 async def update_movie(
     movie_id: int,
     movie_update: MovieUpdateSchema,
@@ -195,8 +196,10 @@ async def update_movie(
     if "country" in update_data:
         country_code = update_data["country"]
         if country_code:
-            country_code = country_code[:3]  # обрізати до 3 символів
-            country_query = await db.execute(select(CountryModel).where(CountryModel.code == country_code))
+            country_code = country_code[:3]
+            country_query = await db.execute(
+                select(CountryModel).where(CountryModel.code == country_code)
+            )
             country_obj = country_query.scalar_one_or_none()
             if not country_obj:
                 country_obj = CountryModel(code=country_code)
@@ -219,13 +222,7 @@ async def update_movie(
         await db.rollback()
         raise HTTPException(status_code=400, detail="Invalid input data.")
 
-    refreshed_query = select(MovieModel).where(MovieModel.id == movie_obj.id).options(
-        selectinload(MovieModel.country),
-        selectinload(MovieModel.genres),
-        selectinload(MovieModel.actors),
-        selectinload(MovieModel.languages),
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"detail": "Movie updated successfully."},
     )
-    refreshed_result = await db.execute(refreshed_query)
-    refreshed_movie = refreshed_result.scalar_one()
-
-    return MovieResponseSchema.model_validate(refreshed_movie)
