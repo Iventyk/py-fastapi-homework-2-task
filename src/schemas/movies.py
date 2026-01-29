@@ -96,14 +96,14 @@ class MoviesListResponseSchema(BaseModel):
 class MovieUpdateSchema(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    name: str
-    date: date
-    score: float
+    name: str | None = None
+    date: date | None = None
+    score: float | None = None
     overview: str | None = None
-    status: MovieStatusEnum
-    budget: float
-    revenue: float
+    status: MovieStatusEnum | None = None
+    budget: float | None = None
+    revenue: float | None = None
     country: CountrySchema | None = None
-    genres: list[GenreSchema] = Field(default_factory=list)
-    actors: list[ActorSchema] = Field(default_factory=list)
-    languages: list[LanguageSchema] = Field(default_factory=list)
+    genres: list[GenreSchema] | None = Field(default_factory=list)
+    actors: list[ActorSchema] | None = Field(default_factory=list)
+    languages: list[LanguageSchema] | None = Field(default_factory=list)
